@@ -1,0 +1,56 @@
+###########################
+##本配置文件中的内容禁止修改####
+###########################
+server:
+  tomcat:
+    uri-encoding: UTF-8
+  ##自定义白标签错误页面
+  error:
+    whitelabel:
+      enabled: false
+    path: /error
+spring:
+  ## 环境配置
+  profiles:
+    active: dev
+    include: spring,ppspirit,redis
+  thymeleaf:
+    check-template: false
+    check-template-location: false
+    freemarker:
+      checkTemplateLocation: false
+  ##屏蔽Repository打印信息
+  data:
+    redis:
+      repositories:
+        enabled: false
+    jdbc:
+      repositories:
+        enabled: false
+  jpa:
+    open-in-view: false
+    hibernate:
+      #validate 项目启动表结构进行校验 如果不一致则报错
+      #none
+      ddl-auto: none
+    show-sql: true
+    format_sql: true
+    properties:
+      hibernate:
+        event:
+          merge:
+            entity_copy_observer: allow
+        session_factory:
+          statement_inspector: pp.spirit.base.interceptor.JpaDynamicTableNameInterceptor
+    ## 文件上传大小配置,不限制大小
+    servlet:
+      multipart:
+        maxFileSize: -1
+        maxRequestSize: -1
+## 持久化配置
+##**schema 不要配置，已经在ppspirit中统一处理动态表名
+mybatis-plus:
+  mapper-locations: classpath*:mybatis/mappers/**/*.xml
+  global-config:
+    # 控制台不打印logo
+    banner: false

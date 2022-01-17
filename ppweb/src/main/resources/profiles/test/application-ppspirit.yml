@@ -1,0 +1,32 @@
+## 自定义配置
+pp:
+  security:
+    anonymous-path: /o/p/**,/open/** # 允许匿名访问的路径
+  io:
+    type: minio   # minio /  local  ## local存储再服务器的项目目录下
+    minio:
+      end-point: http://127.0.0.1:9000/
+      access-key: minioadmin
+      secret-key: minioadmin
+      default-bucket: miniobucket
+    temp-dir: e:/temp  # 临时工作目录， 视频预览
+  user:
+    default-password: 123456
+    login-fail-retry-times: 5   #用户登录失败重试次数
+    login-fail-locked-minutes: 10   #用户登录失败锁定时常(分钟)
+  token:
+    auto-bind-cookie: false #登录成功后自动将token存储到cookie中（HttpOnly）。如果是前后分离部署项目，此项应设置为false，应交由前端处理token.否则的话前端无法读取和修改cookie值
+    secret-key: storywebkey #  token加密密钥
+    ## token、refresh-token 机制减少缓存频繁访问，利用了token的有效期
+    token-expires-minutes: 1   #token令牌的过期时间，用于鉴权
+    refresh-token-timeout-minutes: 30   # refresh-token 用户登录会话时常（分钟） -- refresh-token ：当token令牌过期，refresh-token负责签发token,refresh-token在redis缓存的时间
+  cache:
+    expires: 604800  # 默认缓存有效时长，7天，使用CacheUtils 简单cache无永久缓存，默认设置不用修改;如需永久，使用 RedisUtils
+  snowflake:
+    worker-id: 1 #机器 ID 部分(影响雪花ID)
+    datacenter-id: 18 #数据标识 ID 部分(影响雪花ID)(workerId 和 datacenterId 一起配置才能重新初始化 Sequence)
+  database:
+    default-table-prefix: pp #表前缀，这里自动追加 auth. 到sql的表名称前面； 包括jpa和mybatis（mybatis的默认schema配置失效）; 条件是表名称中不含点 .
+    special-table-prefix:
+      auth:  # 指定表的前缀，此类表追加 auth. 前缀  ; 条件是表名称中不含点 .,多个表明以英文逗号分隔
+      wg: SP
