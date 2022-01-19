@@ -18,8 +18,9 @@ import java.util.stream.Collectors;
 public class MenuComponent implements Serializable {
 
     private String path; //组件路径
+    private String icon;//图标
     private String component;//组件
-    private Map<String,String> meta = new HashMap<>();//组件其他描述
+    private Map<String,Object> meta = new HashMap<>();//组件其他描述
     private String name;//组件名称-- 不同于menuName
 //    private String alias;//组件名称
     private String redirect;//重定向地址
@@ -27,21 +28,36 @@ public class MenuComponent implements Serializable {
     private List<MenuComponent> children;
 
     public MenuComponent transform(Menu menu){
+        /*菜单访问地址*/
         this.path = menu.getPath()==null?"":menu.getPath();
-
-        //  ppspirit/system/dept    ->  PpspiritSystemDept
-        this.name = menu.getPath()!=null?StringUtils.underlineToCamel(menu.getPath().replaceAll("/","_")):"";
-
-//        this.alias = this.path;
-        this.meta.put("title",menu.getMenuName());
+        /*路由组件，或者为空*/
+        this.component = menu.getTarget();
+        /*图标*/
+        this.icon = menu.getIcon();
+        /*菜单*/
+        if(menu.getIsMenu() == 1){
+            /*组件*/
+            if(menu.getIsComponent() == 1){
+                this.name = menu.getTarget()!=null?StringUtils.underlineToCamel(menu.getTarget().replaceAll("/","_")):"";
+            }else{
+                /*弹框或者内嵌，只对 非组件的链接有效 */
+                if(menu.getInFrame() == 1){
+                    this.path = "/"+menu.getMenuId();
+                    this.name = menu.getMenuId()+"";
+                    this.meta.put("frameSrc",menu.getPath());
+                }
+            }
+        }
 
         List<Menu> menuChildren = menu.getChildren();
         if(menuChildren!=null){
             this.children = menuChildren.stream().map(menu1 -> new MenuComponent().transform(menu1)).collect(Collectors.toList());
-            this.component = "LAYOUT";
-        }else{
-            this.component = menu.getPath()!=null?menu.getPath()+"/index":"LAYOUT";
         }
+
+        /*菜单名称*/
+        this.meta.put("title",menu.getMenuName());
+        this.meta.put("hideMenu",menu.getIsHidden()==1);
+//        this.meta.put("disabled",menu.getIsEnabled()==0);
         return this;
     }
 }

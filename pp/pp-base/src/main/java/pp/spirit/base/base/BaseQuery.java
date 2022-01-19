@@ -10,9 +10,9 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 
-import javax.persistence.criteria.Path;
-import javax.persistence.criteria.Root;
+import javax.persistence.criteria.*;
 import java.lang.reflect.Field;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -26,13 +26,74 @@ import java.util.stream.Collectors;
  */
 public interface BaseQuery<T> {
 
-    /**组装查询条件*/
-    @JsonIgnore
-    public QueryWrapper<T> getQueryWrapper();
+    /**组装查询条件
+     * 供子类覆盖
+     * */
+    default QueryWrapper<T> buildQueryWrapper() {
+        QueryWrapper<T> queryWrapper = new QueryWrapper<>();
+        buildOrders(queryWrapper);
+        return queryWrapper;
+    }
+
+    /**组装查询条件
+     * 供子类覆盖
+     * */
+    default List<Predicate> buildPredicates(Root<T> root, CriteriaQuery<?> criteriaQuery, CriteriaBuilder criteriaBuilder){
+        /**
+         * order By
+         */
+        buildOrders(root,criteriaQuery,criteriaBuilder);
+        return new ArrayList<>();
+    };
 
     /**组装查询条件*/
     @JsonIgnore
-    public Specification<T> getSpecification();
+    default QueryWrapper<T> getQueryWrapper(){
+        QueryWrapper<T> queryWrapper = this.buildQueryWrapper();
+        return queryWrapper;
+    }
+
+    /**
+     * 组装查询条件
+     */
+    @JsonIgnore
+    default Specification<T> getSpecification() {
+        return new Specification<T>(){
+            @Override
+            public Predicate toPredicate(Root<T> root, CriteriaQuery<?> criteriaQuery, CriteriaBuilder criteriaBuilder) {
+                //root.get("address")表示获取address这个字段名称
+                List<Predicate> predicates = buildPredicates(root, criteriaQuery, criteriaBuilder);
+
+                return criteriaQuery.where(predicates.toArray(new Predicate[predicates.size()])).getRestriction();
+            }
+        };
+    }
+
+    default QueryWrapper<T> buildOrders(QueryWrapper<T> qw){
+        BaseBean<T> baseBean = (BaseBean)this;
+        if(baseBean.orders!=null&&baseBean.orders.size()>0) {
+            baseBean.getOrders().stream().forEach(orderItem ->{
+                qw.orderBy(true,orderItem.isAsc(),getMpColumnName(orderItem.getColumn()));
+            });
+        }
+        return qw;
+    }
+
+    default void buildOrders(Root<T> root, CriteriaQuery<?> criteriaQuery, CriteriaBuilder criteriaBuilder){
+        BaseBean<T> baseBean = (BaseBean)this;
+        if(baseBean.orders!=null&&baseBean.orders.size()>0) {
+            List<Order> orderList = Lists.newArrayList();
+
+            baseBean.getOrders().stream().forEach(orderItem ->{
+                if(orderItem.isAsc()){
+                    orderList.add(criteriaBuilder.asc(root.get(orderItem.getColumn())));
+                }else{
+                    orderList.add(criteriaBuilder.desc(root.get(orderItem.getColumn())));
+                }
+            });
+            criteriaQuery.orderBy(orderList);
+        }
+    }
 
     /**获取分页查询信息*/
     @JsonIgnore
@@ -40,7 +101,6 @@ public interface BaseQuery<T> {
         BaseBean<T> baseBean = (BaseBean)this;
         Page<T> page = new Page<>(baseBean.getCurrent(),baseBean.getSize());
         if(baseBean.orders!=null&&baseBean.orders.size()>0){
-            //转换实体类字段名称为数据库字段 名称
             List<com.baomidou.mybatisplus.core.metadata.OrderItem> ois = baseBean.getOrders().stream().map(orderItem -> {
                 return new com.baomidou.mybatisplus.core.metadata.OrderItem(getMpColumnName(orderItem.getColumn()),orderItem.isAsc());
             }).collect(Collectors.toList());

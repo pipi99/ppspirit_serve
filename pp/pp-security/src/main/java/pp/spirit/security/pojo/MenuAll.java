@@ -38,17 +38,28 @@ public class MenuAll extends BaseBean<MenuAll> {
      **/
     @NotEmpty(message = "菜单名称不能为空")
     @Length(max = 100)
+    @ApiModelProperty(value = "菜单名称")
     private String menuName;
 
+    @ApiModelProperty(value = "图标")
+    private String icon;
+
     /**
-     * 菜单链接
+     * 菜单对象（组件、链接地址）
      **/
-    @NotEmpty(message = "组件地址不能为空")
     @Length(max = 1000)
-    private String path;
+    @ApiModelProperty(value = "菜单对象（组件、链接地址）")
+    private String target;
+
+    /**
+     * 是否组件
+     **/
+    @ApiModelProperty(value = "是否组件 1 是 0否")
+    private Integer isComponent;
 
     /**
      * 菜单说明
      **/
+    @ApiModelProperty(value = "菜单描述信息")
     private String description;
 }

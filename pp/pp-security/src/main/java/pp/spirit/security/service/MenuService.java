@@ -1,6 +1,6 @@
 package pp.spirit.security.service;
 
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.metadata.OrderItem;
 import com.baomidou.mybatisplus.extension.toolkit.SqlHelper;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,6 +11,7 @@ import pp.spirit.base.utils.Collection2TreeUtils;
 import pp.spirit.security.dao.jpa.MenuRepository;
 import pp.spirit.security.dao.mapper.MenuMapper;
 import pp.spirit.security.pojo.Menu;
+import pp.spirit.security.pojo.MenuQuery;
 import pp.spirit.security.pojo.Permission;
 import pp.spirit.security.pojo.User;
 import pp.spirit.security.pojo.domainmodel.MenuComponent;
@@ -22,6 +23,7 @@ import pp.spirit.security.springsecurity.utils.SecurityUtil;
 
 import javax.transaction.Transactional;
 import java.io.Serializable;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -100,8 +102,9 @@ public class MenuService extends BaseService<Long, Menu, MenuMapper, MenuReposit
      */
     public List<Menu> getCurrentUserMenus() throws Exception {
         //开放链接和免授权链接
-        QueryWrapper<Menu> qw = new QueryWrapper<>();
-        qw.eq("ENABLED",1);
+        MenuQuery menuQuery = new MenuQuery();
+        menuQuery.setIsHidden(0);
+        menuQuery.setOrders(Arrays.asList(new OrderItem("sort",true)));
 
         User user = SecurityUtil.getCurrentUser();
         List<Menu> menus = null;
@@ -109,12 +112,12 @@ public class MenuService extends BaseService<Long, Menu, MenuMapper, MenuReposit
         //如果不是管理员或者超级管理员
         boolean isAdminOrSuerAdmin = user.getRoles()!=null&&user.getRoles().stream().anyMatch((role)->role.getRoleName().equalsIgnoreCase(SecurityConst.ROLE_ADMINISTRATOR)||role.getRoleName().equalsIgnoreCase(SecurityConst.ROLE_SUPER_ADMINISTRATOR));
         if(isAdminOrSuerAdmin){
-            menus = this.list(qw);
+            menus = this.list(menuQuery.getQueryWrapper());
         }else {
-            qw.and((menuQueryWrapper -> {
+            menuQuery.getQueryWrapper().and((menuQueryWrapper -> {
                 menuQueryWrapper.eq("ACCESS_CTRL", SecurityConst.MENU_ANONYMOUS).or().eq("ACCESS_CTRL", SecurityConst.MENU_LOGIN);
             }));
-            menus = this.list(qw);
+            menus = this.list(menuQuery.getQueryWrapper());
             //授权链接
             List<Menu> authMenus = SecurityUtil.getCurrentUserMenus();
             //去重

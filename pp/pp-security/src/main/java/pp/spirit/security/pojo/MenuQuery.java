@@ -2,9 +2,7 @@ package pp.spirit.security.pojo;
 
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.google.common.collect.Lists;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.data.jpa.domain.Specification;
 import pp.spirit.base.base.BaseQuery;
 
 import javax.persistence.criteria.CriteriaBuilder;
@@ -23,13 +21,14 @@ import java.util.List;
  */
 
 public class MenuQuery extends Menu implements BaseQuery<Menu> {
-
     /**
      * 组装查询条件
-     */
+     * */
     @Override
-    public QueryWrapper<Menu> getQueryWrapper() {
-        QueryWrapper<Menu> qw = new QueryWrapper<>();
+    public QueryWrapper<Menu> buildQueryWrapper() {
+        //这里用接口中的，具有默认排序实现
+        QueryWrapper<Menu> qw = BaseQuery.super.buildQueryWrapper();
+
         if(StringUtils.isNotEmpty(this.getMenuName())){
             qw.like(getMpColumnName("menuName"),this.getMenuName());
         }
@@ -39,8 +38,11 @@ public class MenuQuery extends Menu implements BaseQuery<Menu> {
         if(this.getAccessCtrl()!=null){
             qw.eq(getMpColumnName("accessCtrl"),this.getAccessCtrl());
         }
-        if(this.getEnabled()!=null){
-            qw.eq(getMpColumnName("enabled"),this.getEnabled());
+        if(this.getIsEnabled()!=null){
+            qw.eq(getMpColumnName("isEnabled"),this.getIsEnabled());
+        }
+        if(this.getIsHidden()!=null){
+            qw.eq(getMpColumnName("isHidden"),this.getIsHidden());
         }
         if(this.getIsMenu()!=null){
             qw.eq(getMpColumnName("isMenu"),this.getIsMenu());
@@ -50,33 +52,32 @@ public class MenuQuery extends Menu implements BaseQuery<Menu> {
 
     /**
      * 组装查询条件
-     */
+     * */
     @Override
-    public Specification<Menu> getSpecification() {
-        Menu bean = this;
-        return new Specification<Menu>(){
-            @Override
-            public Predicate toPredicate(Root<Menu> root, CriteriaQuery<?> criteriaQuery, CriteriaBuilder criteriaBuilder) {
-                //root.get("address")表示获取address这个字段名称
-                List<Predicate> predicates = Lists.newArrayList();
-                //实体类字段名称
-                if(StringUtils.isNotEmpty(bean.getMenuName())){
-                    predicates.add(criteriaBuilder.like(root.get("menuName"), "%"+bean.getMenuName()+"%"));
-                }
-                if(bean.getParentId()!=null){
-                    predicates.add(criteriaBuilder.equal(root.get("parentId"), bean.getParentId()));
-                }
-                if(bean.getAccessCtrl()!=null){
-                    predicates.add(criteriaBuilder.equal(root.get("accessCtrl"), bean.getAccessCtrl()));
-                }
-                if(bean.getEnabled()!=null){
-                    predicates.add(criteriaBuilder.equal(root.get("enabled"), bean.getEnabled()));
-                }
-                if(bean.getIsMenu()!=null){
-                    predicates.add(criteriaBuilder.equal(root.get("isMenu"), bean.getIsMenu()));
-                }
-                return criteriaBuilder.and(predicates.toArray(new Predicate[predicates.size()]));
-            }
-        };
-    }
+    public List<Predicate> buildPredicates(Root<Menu> root, CriteriaQuery<?> criteriaQuery, CriteriaBuilder criteriaBuilder){
+        //这里用接口中的方法，具有默认排序实现
+        List<Predicate> predicates = BaseQuery.super.buildPredicates(root,criteriaQuery,criteriaBuilder);
+
+        //实体类字段名称
+        if(StringUtils.isNotEmpty(this.getMenuName())){
+            predicates.add(criteriaBuilder.like(root.get("menuName"), "%"+this.getMenuName()+"%"));
+        }
+        if(this.getParentId()!=null){
+            predicates.add(criteriaBuilder.equal(root.get("parentId"), this.getParentId()));
+        }
+        if(this.getAccessCtrl()!=null){
+            predicates.add(criteriaBuilder.equal(root.get("accessCtrl"), this.getAccessCtrl()));
+        }
+        if(this.getIsEnabled()!=null){
+            predicates.add(criteriaBuilder.equal(root.get("isEnabled"), this.getIsEnabled()));
+        }
+        if(this.getIsHidden()!=null){
+            predicates.add(criteriaBuilder.equal(root.get("isHidden"), this.getIsHidden()));
+        }
+        if(this.getIsMenu()!=null){
+            predicates.add(criteriaBuilder.equal(root.get("isMenu"), this.getIsMenu()));
+        }
+        return predicates;
+    };
+
 }

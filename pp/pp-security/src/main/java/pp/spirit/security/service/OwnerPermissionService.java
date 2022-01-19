@@ -83,7 +83,7 @@ public class OwnerPermissionService extends BaseService<Long, OwnerPermission, O
     public List<Permission> treeList() throws Exception {
         // 首先获取菜单
         MenuQuery menuQuery = new MenuQuery();
-        menuQuery.setEnabled(1);
+        menuQuery.setIsHidden(0);
         //分配需授权访问的菜单
         menuQuery.setAccessCtrl(2);
         List<Menu> menus = menuService.getRepository().findAll(menuQuery.getSpecification());

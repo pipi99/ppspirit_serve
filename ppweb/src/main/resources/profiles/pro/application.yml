@@ -54,3 +54,6 @@ mybatis-plus:
   global-config:
     # 控制台不打印logo
     banner: false
+    db-config:
+      insert-strategy: IGNORED
+      update-strategy: IGNORED

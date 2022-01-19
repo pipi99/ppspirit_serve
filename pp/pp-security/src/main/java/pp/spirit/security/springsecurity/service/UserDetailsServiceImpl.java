@@ -31,8 +31,7 @@ public class UserDetailsServiceImpl implements UserDetailsService {
             throw new UsernameNotFoundException("找不到该用户："+username);
         }else {
             //判断锁定状态
-            int locked = sysUser.getLocked();
-            if(locked ==1){
+            if(sysUser.getLocked() !=null && sysUser.getLocked() ==1){
                 int lockMinutes = ContextUtils.getBean(PPProperties.class).getUserLoginFailLockedMinutes();
                 Date lockedDate = sysUser.getLockTime();
                 //已经过了锁定时常

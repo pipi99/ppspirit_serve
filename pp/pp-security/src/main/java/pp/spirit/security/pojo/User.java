@@ -145,7 +145,6 @@ public class User extends BaseBean<User> implements Serializable {
      *
      * Nullable:  true
      */
-    @TableField(fill = FieldFill.INSERT_UPDATE)
     private Date lockTime;
 
     /**
