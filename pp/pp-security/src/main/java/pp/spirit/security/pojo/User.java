@@ -121,6 +121,12 @@ public class User extends BaseBean<User> implements Serializable {
     private Date birthday;
 
     /**
+     * 菜单排序
+     **/
+    @ApiModelProperty(value = "排序号")
+    private Integer sort;
+
+    /**
      * 照片
      *
      * Nullable:  true

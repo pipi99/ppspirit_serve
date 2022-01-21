@@ -1,9 +1,7 @@
 package pp.spirit.security.pojo;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.google.common.collect.Lists;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.data.jpa.domain.Specification;
 import pp.spirit.base.base.BaseQuery;
 
 import javax.persistence.criteria.CriteriaBuilder;
@@ -21,12 +19,14 @@ import java.util.List;
  * @since 2020-05-21
  */
 public class OrganQuery extends Organ implements BaseQuery<Organ> {
+
     /**
      * 组装查询条件
-     */
+     * */
     @Override
-    public QueryWrapper<Organ> getQueryWrapper() {
-        QueryWrapper<Organ> qw = new QueryWrapper<>();
+    public QueryWrapper<Organ> buildQueryWrapper() {
+        //这里用接口中的，具有默认排序实现
+        QueryWrapper<Organ> qw = BaseQuery.super.buildQueryWrapper();
         if(StringUtils.isNotEmpty(this.getOrganName())){
             qw.like("ORGAN_NAME",this.getOrganName());
         }
@@ -36,27 +36,41 @@ public class OrganQuery extends Organ implements BaseQuery<Organ> {
         if(StringUtils.isNotEmpty(this.getOrganType())){
             qw.eq("ORGAN_TYPE",this.getOrganType());
         }
+        if(this.getEnabled()!=null){
+            qw.eq("enabled",this.getEnabled());
+        }
         return qw;
     }
 
     /**
      * 组装查询条件
-     */
+     * */
     @Override
-    public Specification<Organ> getSpecification() {
-        Organ bean = this;
-        return new Specification<Organ>(){
-            @Override
-            public Predicate toPredicate(Root<Organ> root, CriteriaQuery<?> criteriaQuery, CriteriaBuilder criteriaBuilder) {
-                //root.get("address")表示获取address这个字段名称
-                List<Predicate> predicates = Lists.newArrayList();
-                //实体类字段名称
-                if(StringUtils.isNotEmpty(bean.getOrganName())){
-                    predicates.add(criteriaBuilder.like(root.get("name"), "%"+bean.getOrganName()+"%"));
-                }
+    public List<Predicate> buildPredicates(Root<Organ> root, CriteriaQuery<?> criteriaQuery, CriteriaBuilder criteriaBuilder){
+        //这里用接口中的方法，具有默认排序实现
+        List<Predicate> predicates = BaseQuery.super.buildPredicates(root,criteriaQuery,criteriaBuilder);
 
-                return criteriaBuilder.and(predicates.toArray(new Predicate[predicates.size()]));
-            }
-        };
-    }
+        //实体类字段名称
+        if(StringUtils.isNotEmpty(this.getOrganName())){
+            predicates.add(criteriaBuilder.like(root.get("name"), "%"+this.getOrganName()+"%"));
+        }
+
+        //这里用接口中的，具有默认排序实现
+        QueryWrapper<Organ> qw = BaseQuery.super.buildQueryWrapper();
+        if(StringUtils.isNotEmpty(this.getOrganName())){
+            predicates.add(criteriaBuilder.like(root.get("organName"), "%"+this.getOrganName()+"%"));
+        }
+        if(StringUtils.isNotEmpty(this.getOrganLevel())){
+            predicates.add(criteriaBuilder.equal(root.get("organLevel"), this.getOrganLevel()));
+        }
+        if(StringUtils.isNotEmpty(this.getOrganType())){
+            predicates.add(criteriaBuilder.equal(root.get("organType"), this.getOrganType()));
+        }
+        if(this.getEnabled()!=null){
+            predicates.add(criteriaBuilder.equal(root.get("enabled"), this.getEnabled()));
+        }
+
+        return predicates;
+    };
+
 }

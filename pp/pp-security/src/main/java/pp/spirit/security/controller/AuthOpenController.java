@@ -171,7 +171,7 @@ public class AuthOpenController  {
             //存储新的用户凭证
             SecurityAuthenticationCacheUtil.putAuthentication(newRefreshToken,authentication);
             //存储新的token
-            SecurityAuthenticationCacheUtil.putToken(newToken);
+            SecurityAuthenticationCacheUtil.putToken(newRefreshToken,newToken);
 
             //清除老的凭证
             if(!refreshToken.equalsIgnoreCase(newRefreshToken)){

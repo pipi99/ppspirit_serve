@@ -42,6 +42,7 @@ public class MenuAll extends BaseBean<MenuAll> {
     private String menuName;
 
     @ApiModelProperty(value = "图标")
+    @Length(max = 200)
     private String icon;
 
     /**

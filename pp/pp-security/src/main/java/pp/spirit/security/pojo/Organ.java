@@ -9,6 +9,7 @@ import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import org.hibernate.annotations.GenericGenerator;
+import org.hibernate.validator.constraints.Length;
 import pp.spirit.base.base.BaseBean;
 import pp.spirit.base.incrementer.IdGenerator;
 
@@ -52,14 +53,25 @@ public class Organ extends BaseBean<Organ> implements Serializable {
     @NotEmpty(message = "机构类型不能为空")
     private String organType;
 
+    @ApiModelProperty(value = "图标")
+    @Length(max = 200)
+    private String icon;
+
+    /**
+     * 菜单排序
+     **/
+    @ApiModelProperty(value = "排序号")
+    private Integer sort;
+
     @ApiModelProperty(value = "机构描述")
+    @Length(max = 200)
     private String description;
 
     @ApiModelProperty(value = "是否真实机构 1 是 0否，默认是，人员不能属于非真实机构")
-    private Integer actual = 1;
+    private Integer actual;
 
     @ApiModelProperty(value = "是否启用 1 是 0否")
-    private Integer enabled = 1;
+    private Integer enabled;
 
     @OneToMany(cascade=CascadeType.ALL,fetch = FetchType.EAGER)
     @JoinColumn(name = "orgId") //表示对应子表的关联外键，如果不使用这个注解则需要创建中间表

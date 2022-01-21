@@ -215,7 +215,7 @@ public class JwtTokenUtil {
          * refreshtoken 其实就是jwtId
          *
          * **/
-        SecurityAuthenticationCacheUtil.putToken(token);
+        SecurityAuthenticationCacheUtil.putToken(jwtId,token);
         //缓存 authentication
         SecurityAuthenticationCacheUtil.putAuthentication(jwtId,authentication);
 

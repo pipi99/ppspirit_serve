@@ -29,9 +29,10 @@ public class OrganController extends BaseController<Organ,OrganQuery, OrganServi
         return ResultBody.success(results);
     }
 
-    @ApiOperation(value = "查询列表-树状结构")
+    @ApiOperation(value = "查询列表-树状结构-用户列表管理使用")
     @PostMapping(value="/treeList")
     public ResultBody treeList(@RequestBody OrganQuery query) throws Exception {
+        query.setEnabled(1);
         List<Organ> results = service.list(query.getQueryWrapper());
         return ResultBody.success(Collection2TreeUtils.getTree(results,"organId","parentId","children"));
     }

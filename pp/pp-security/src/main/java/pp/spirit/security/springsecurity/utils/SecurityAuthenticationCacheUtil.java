@@ -172,18 +172,18 @@ public class SecurityAuthenticationCacheUtil implements ApplicationContextAware 
     /**
      * 缓存jwttoken
      **/
-    public static void putToken(String token){
-        String key = SPRING_SECURITY_JWT_CACHE_NAME+jwtTokenUtil.getJwtIdFromToken(token);
+    public static void putToken(String jwtId,String token){
+        String key = SPRING_SECURITY_JWT_CACHE_NAME+jwtId;
         CacheUtil.set(key,token,ppProperties.getTokenRefreshTokenTimeoutMinutes()*60);
     }
 
     /**
      * 获取jwttoken
      * 这里的key是  jwt_id  的值
-     * @param jwt_id 这里的key是  jwt_id  的值
+     * @param jwtId 这里的key是  jwt_id  的值
      **/
-    public static String getToken(String jwt_id){
-        String key = SPRING_SECURITY_JWT_CACHE_NAME+jwt_id;
+    public static String getToken(String jwtId){
+        String key = SPRING_SECURITY_JWT_CACHE_NAME+jwtId;
         Object o = CacheUtil.get(key);
         return o==null?null:o+"";
     }
@@ -199,16 +199,16 @@ public class SecurityAuthenticationCacheUtil implements ApplicationContextAware 
     /**
      * 缓存authentication
      **/
-    public static void putAuthentication(String token, Authentication authentication){
-        String key = SPRING_SECURITY_AUTHENTICATION_CACHE_NAME+token;
+    public static void putAuthentication(String jwtId, Authentication authentication){
+        String key = SPRING_SECURITY_AUTHENTICATION_CACHE_NAME+jwtId;
         CacheUtil.set(key,authentication,ppProperties.getTokenRefreshTokenTimeoutMinutes()*60);
     }
 
     /**
      * 获取authentication
      **/
-    public static Authentication getAuthentication(String token){
-        String key = SPRING_SECURITY_AUTHENTICATION_CACHE_NAME+token;
+    public static Authentication getAuthentication(String jwtId){
+        String key = SPRING_SECURITY_AUTHENTICATION_CACHE_NAME+jwtId;
         Object o = CacheUtil.get(key);
         return o==null?null:(Authentication)o;
     }
@@ -216,8 +216,8 @@ public class SecurityAuthenticationCacheUtil implements ApplicationContextAware 
     /**
      * 删除authentication
      **/
-    public static void deleteAuthentication(String token){
-        String key = SPRING_SECURITY_AUTHENTICATION_CACHE_NAME+token;
+    public static void deleteAuthentication(String jwtId){
+        String key = SPRING_SECURITY_AUTHENTICATION_CACHE_NAME+jwtId;
         CacheUtil.del(key);
     }
 

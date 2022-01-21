@@ -57,7 +57,7 @@ public class MenuComponent implements Serializable {
         /*菜单名称*/
         this.meta.put("title",menu.getMenuName());
         this.meta.put("hideMenu",menu.getIsHidden()==1);
-//        this.meta.put("disabled",menu.getIsEnabled()==0);
+        this.meta.put("icon",menu.getIcon());
         return this;
     }
 }

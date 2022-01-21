@@ -1,9 +1,7 @@
 package pp.spirit.security.pojo;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.google.common.collect.Lists;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.data.jpa.domain.Specification;
 import pp.spirit.base.base.BaseQuery;
 
 import javax.persistence.criteria.CriteriaBuilder;
@@ -23,8 +21,8 @@ import java.util.List;
 public class UserQuery extends User implements BaseQuery<User> {
 
     @Override
-    public QueryWrapper<User> getQueryWrapper() {
-        QueryWrapper qw = new QueryWrapper();
+    public QueryWrapper<User> buildQueryWrapper() {
+        QueryWrapper qw = BaseQuery.super.buildQueryWrapper();
         if(this.getUserId()!=null){
             qw.eq(getMpColumnName("userId"),this.getUserId());
         }
@@ -40,35 +38,27 @@ public class UserQuery extends User implements BaseQuery<User> {
         return qw;
     }
 
-    /**
-     * 组装查询条件
-     */
     @Override
-    public Specification<User> getSpecification() {
-        User bean = this;
-        return new Specification<User>(){
-            @Override
-            public Predicate toPredicate(Root<User> root, CriteriaQuery<?> criteriaQuery, CriteriaBuilder criteriaBuilder) {
-                //root.get("address")表示获取address这个字段名称
-                List<Predicate> predicates = Lists.newArrayList();
-                if(bean.getUserId()!=null){
-                    predicates.add(criteriaBuilder.equal(root.get("userId"), bean.getUserId()));
-                }
-                //实体类字段名称
-                if(StringUtils.isNotEmpty(bean.getUserName())){
-                    predicates.add(criteriaBuilder.equal(root.get("userName"), bean.getUserName()));
-                }
-                //实体类字段名称
-                if(StringUtils.isNotEmpty(bean.getAlias())){
-                    predicates.add(criteriaBuilder.like(root.get("alias"), "%"+bean.getAlias()+"%"));
-                }
-                //实体类字段名称
-                if(bean.getOrgId()!=null){
-                    predicates.add(criteriaBuilder.equal(root.get("orgId"), bean.getOrgId()));
-                }
+    public List<Predicate> buildPredicates(Root<User> root, CriteriaQuery<?> criteriaQuery, CriteriaBuilder criteriaBuilder){
+        //这里用接口中的方法，具有默认排序实现
+        List<Predicate> predicates = BaseQuery.super.buildPredicates(root,criteriaQuery,criteriaBuilder);
 
-                return criteriaBuilder.and(predicates.toArray(new Predicate[predicates.size()]));
-            }
-        };
+        //实体类字段名称
+        if(this.getUserId()!=null){
+            predicates.add(criteriaBuilder.equal(root.get("userId"), this.getUserId()));
+        }
+        //实体类字段名称
+        if(StringUtils.isNotEmpty(this.getUserName())){
+            predicates.add(criteriaBuilder.equal(root.get("userName"), this.getUserName()));
+        }
+        //实体类字段名称
+        if(StringUtils.isNotEmpty(this.getAlias())){
+            predicates.add(criteriaBuilder.like(root.get("alias"), "%"+this.getAlias()+"%"));
+        }
+        //实体类字段名称
+        if(this.getOrgId()!=null){
+            predicates.add(criteriaBuilder.equal(root.get("orgId"), this.getOrgId()));
+        }
+        return predicates;
     }
 }

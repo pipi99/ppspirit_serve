@@ -81,6 +81,7 @@ public class Menu extends BaseBean<Menu> {
      * 菜单图标
      **/
     @ApiModelProperty(value = "菜单图标")
+    @Length(max = 200)
     private String icon;
 
     /**
