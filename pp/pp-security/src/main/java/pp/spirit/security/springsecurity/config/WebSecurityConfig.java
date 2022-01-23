@@ -1,7 +1,6 @@
 package pp.spirit.security.springsecurity.config;
 
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
@@ -69,6 +68,8 @@ public class WebSecurityConfig {
                     .antMatchers(HttpMethod.OPTIONS, "/**")
                     //系统默认提供的匿名访问链接配置
                     .antMatchers("/o/p/**")
+                    //swagger
+                    .antMatchers("/swagger-ui/**","/webjars/**","/doc.html","/swagger-resources/**","/v3/**")
                     //静态资源
                     .antMatchers("/static/**","/**/*.js","/**/*.png","/**/*.jpg","/**/*.gif","/**/*.jpeg","/**/*.css","/**/*.woff","/**/*.ttf","/**/*.ico","/**/*.eot","/**/*.svg","/**/*.MP4","/**/*.mp4");
         }
@@ -84,14 +85,19 @@ public class WebSecurityConfig {
             }
         }
     }
+
     /**
      * Basic认证方式过滤器
+     *
      * 用于开发阶段，调用swagger-ui的时候鉴权
      * 优先拦截权限
+     *
+     * 此模式无法兼容 接口开发和前端调试，需要在dev/pro之间 来回切换，需要将swagger作为开放接口
      */
-    @Order(2)
-    @Configuration
-    @ConditionalOnProperty(value = "spring.profiles.active", havingValue = "dev")
+//    @Order(2)
+//    @Configuration
+//    @ConditionalOnProperty(value = "spring.profiles.active", havingValue = "dev")
+        @Deprecated
     public class ApiHttpBasicWebSecurityConfig extends WebSecurityConfigurerAdapter {
 
         @Override
@@ -109,11 +115,10 @@ public class WebSecurityConfig {
 
         @Override
         protected void configure(HttpSecurity http) throws Exception {
-
             http
                 //本SecurityFilterChain 进入的 条件
                 .requestMatchers(requestMatcherConfigurer -> {
-                    requestMatcherConfigurer.antMatchers("/**");
+                    requestMatcherConfigurer.antMatchers("/swagger-ui/**","/webjars/**","/doc.html","/swagger-resources/**","/v3/**");
                 })
 
                 //除可匿名链接外，所有的请求都需要认证访问
@@ -143,6 +148,7 @@ public class WebSecurityConfig {
     /**
      * 需登录认证方式
      */
+    @Order(3)
     @Configuration
     @EnableGlobalMethodSecurity(prePostEnabled = true,securedEnabled = true)
     public class FormLoginWebSecurityConfig extends WebSecurityConfigurerAdapter {
@@ -205,7 +211,6 @@ public class WebSecurityConfig {
                             }
                         });
                 })
-
                 // 登录配置
                 .formLogin(httpSecurityFormLoginConfigurer -> {
                     httpSecurityFormLoginConfigurer
@@ -242,7 +247,8 @@ public class WebSecurityConfig {
             // 基于token，所以不需要session
             http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
             //跨域处理 ,禁用 csrf, httpBasic
-            http.cors().and().csrf().disable();
+            http.cors().and().httpBasic().and().csrf().disable();
+
         }
     }
  }

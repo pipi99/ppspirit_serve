@@ -26,6 +26,15 @@ public class UsernamePasswordCaptchaProvider extends DaoAuthenticationProvider {
         //校验验证码
         DefaultKaptcha defaultKaptcha = ContextUtils.getBean(DefaultKaptcha.class);
         String captchaId = ContextUtils.getRequest().getParameter("captchaId");
+
+        String mode = ContextUtils.getRequest().getParameter("___for__swagger__login___");
+        //提供swagger支持的访问
+        if("dev".equalsIgnoreCase(mode)){
+            super.additionalAuthenticationChecks(userDetails,new UsernamePasswordAuthenticationToken(authentication.getPrincipal(),authentication.getCredentials().toString(),authentication.getAuthorities()));
+            return;
+        }
+
+        //正常登录流程
         String verificationCode = ContextUtils.getRequest().getParameter("verifyCode");
         String sessionKey = defaultKaptcha.getConfig().getSessionKey();
         Object o = CacheUtil.get(sessionKey+":"+captchaId);

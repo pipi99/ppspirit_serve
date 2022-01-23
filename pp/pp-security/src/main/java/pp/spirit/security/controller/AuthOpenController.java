@@ -16,13 +16,13 @@ import org.apache.http.impl.client.HttpClients;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import pp.spirit.base.base.ResultBody;
 import pp.spirit.base.base.ResultCodeMessage;
 import pp.spirit.base.utils.ContextUtils;
 import pp.spirit.cache.util.CacheUtil;
-import pp.spirit.security.pojo.LoginForm;
 import pp.spirit.security.springsecurity.utils.JwtTokenUtil;
 import pp.spirit.security.springsecurity.utils.RSAUtils;
 import pp.spirit.security.springsecurity.utils.SecurityAuthenticationCacheUtil;
@@ -30,6 +30,7 @@ import sun.misc.BASE64Encoder;
 
 import javax.imageio.ImageIO;
 import javax.servlet.ServletException;
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.awt.image.BufferedImage;
@@ -52,16 +53,14 @@ public class AuthOpenController  {
      */
     @ApiOperation(value = "用户登录", notes="用户登录")
     @PostMapping("/login")
-    @Deprecated
-    public ResultBody login(@RequestBody LoginForm loginForm, HttpServletRequest request) throws ServletException, IOException {
+    @ConditionalOnProperty(value = "spring.profiles.active", havingValue = "dev")
+    public ResultBody login(@RequestParam String username, @RequestParam String password,HttpServletRequest request,HttpServletResponse rep) throws ServletException, IOException {
         //请求spring-security 登录链接
         List<NameValuePair> formParams = new ArrayList<>();
-        formParams.add(new BasicNameValuePair("username", loginForm.getUsername()));
-        formParams.add(new BasicNameValuePair("password",  loginForm.getPassword()));
-        formParams.add(new BasicNameValuePair("captchaId", loginForm.getCaptchaId()));
-        formParams.add(new BasicNameValuePair("verifyCode",  loginForm.getVerifyCode()));
-        formParams.add(new BasicNameValuePair("key1", loginForm.getKey1()));
-        formParams.add(new BasicNameValuePair("key2",  loginForm.getKey2()));
+        formParams.add(new BasicNameValuePair("username", username));
+        formParams.add(new BasicNameValuePair("password",  password));
+        formParams.add(new BasicNameValuePair("___for__swagger__login___", "dev"));
+
         HttpEntity reqEntity = new UrlEncodedFormEntity(formParams, "utf-8");
 
         RequestConfig requestConfig = RequestConfig.custom()
@@ -85,6 +84,15 @@ public class AuthOpenController  {
                 JSONObject jsonObject = JSONObject.parseObject(message);
 
                 if(jsonObject.getInteger("code") == 200){
+                    //Cookie存储token
+                    Cookie cookie = new Cookie("pp-spirit-token", jsonObject.getObject("data",Map.class).get("token")+"");
+                    //值大于0, 将cookie存储于本地磁盘, 过期后删除；值小于0, cookie不会保存于本地, 浏览器会话结束后, 将会删除
+                    cookie.setMaxAge(-1);
+                    //前端不可修改
+                    cookie.setHttpOnly(true);
+                    cookie.setPath(ContextUtils.getRequest().getContextPath());
+                    cookie.setDomain(ContextUtils.getRequest().getServerName());
+                    rep.addCookie(cookie);
                     return ResultBody.result(jsonObject.getInteger("code"),jsonObject.getString("message"),jsonObject.getObject("data",Map.class));
                 }else{
                     return ResultBody.result(jsonObject.getInteger("code"),jsonObject.getString("message"),jsonObject.getString("data"));

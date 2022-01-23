@@ -15,7 +15,7 @@ pp:
     login-fail-retry-times: 5   #用户登录失败重试次数
     login-fail-locked-minutes: 10   #用户登录失败锁定时常(分钟)
   token:
-    auto-bind-cookie: false #登录成功后自动将token存储到cookie中（HttpOnly）。如果是前后分离部署项目，此项应设置为false，应交由前端处理token.否则的话前端无法读取和修改cookie值
+    auto-bind-cookie: true #登录成功后自动将token存储到cookie中（HttpOnly）。如果是前后分离部署项目，此项应设置为false，应交由前端处理token.否则的话前端无法读取和修改cookie值
     secret-key: storywebkey #  token加密密钥
     ## token、refresh-token 机制减少缓存频繁访问，利用了token的有效期
     token-expires-minutes: 1   #token令牌的过期时间，用于鉴权

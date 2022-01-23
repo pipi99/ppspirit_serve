@@ -25,8 +25,6 @@ public class AuthController {
     @Autowired
     private UserService userService;
 
-
-
     @ApiOperation(value = "用户注册", notes="注册用户")
     @GetMapping(value="/reg")
     public ResultBody reg(String username,String alias,String password) throws Exception {

@@ -198,7 +198,8 @@ public class JwtTokenUtil {
             cookie.setMaxAge(-1);
             //前端不可修改
             cookie.setHttpOnly(true);
-            cookie.setPath("/");
+            cookie.setPath(ContextUtils.getRequest().getContextPath());
+            cookie.setDomain(ContextUtils.getRequest().getServerName());
             response.addCookie(cookie);
         }
 
